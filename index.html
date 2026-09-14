@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STACK 2026 — Find Your Certificate</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --maroon:#8F0E15;
+    --maroon-dark:#6B0A10;
+    --ink:#2A211D;
+    --paper:#FBF6EC;
+    --paper-2:#F4EBDC;
+    --line:#E3D6C3;
+    --gold:#C8862B;
+    --muted:#7A6E62;
+    --white:#FFFFFF;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1200px 600px at 50% -10%, #fffaf1 0%, var(--paper) 55%, var(--paper-2) 100%);
+    min-height:100vh;
+    font-family:'Inter',system-ui,sans-serif;
+    color:var(--ink);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:0 20px 60px;
+  }
+  .topbar{
+    width:100%;
+    max-width:640px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:28px 0 8px;
+  }
+  .topbar .mark{
+    width:30px;height:30px;border-radius:7px;
+    background:linear-gradient(135deg,#F4C24B, var(--maroon) 70%);
+    flex-shrink:0;
+  }
+  .topbar .wordmark{
+    font-family:'Lora',serif;
+    font-weight:600;
+    font-size:15px;
+    letter-spacing:.2px;
+    color:var(--ink);
+  }
+  .topbar .wordmark span{color:var(--maroon);}
+
+  header.hero{
+    max-width:560px;
+    text-align:center;
+    margin:22px 0 30px;
+  }
+  header.hero h1{
+    font-family:'Lora',serif;
+    font-weight:600;
+    font-size:clamp(28px,4.4vw,38px);
+    line-height:1.15;
+    margin:0 0 12px;
+    color:var(--ink);
+  }
+  header.hero p{
+    margin:0;
+    color:var(--muted);
+    font-size:15.5px;
+    line-height:1.55;
+  }
+
+  .card{
+    width:100%;
+    max-width:520px;
+    background:var(--white);
+    border:1px solid var(--line);
+    border-radius:16px;
+    box-shadow:0 1px 2px rgba(42,33,29,.04), 0 12px 32px -16px rgba(143,14,21,.16);
+    padding:34px 32px 30px;
+    position:relative;
+    overflow:hidden;
+  }
+  .card::before{
+    content:"";
+    position:absolute; top:0; left:0; right:0; height:4px;
+    background:linear-gradient(90deg, var(--gold), var(--maroon));
+  }
+
+  .step-label{
+    font-size:12.5px;
+    color:var(--maroon);
+    font-weight:600;
+    margin:0 0 4px;
+  }
+  .step-title{
+    font-family:'Lora',serif;
+    font-size:20px;
+    font-weight:600;
+    margin:0 0 22px;
+    color:var(--ink);
+  }
+
+  .choice-row{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+  .choice-btn{
+    text-align:left;
+    width:100%;
+    border:1.5px solid var(--line);
+    background:var(--paper);
+    border-radius:11px;
+    padding:16px 18px;
+    font-family:'Inter',sans-serif;
+    font-size:15px;
+    font-weight:500;
+    color:var(--ink);
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .choice-btn:hover{ border-color:var(--maroon); background:#fff; }
+  .choice-btn .arrow{ color:var(--maroon); font-size:17px; }
+  .choice-sub{ font-size:12.5px; color:var(--muted); font-weight:400; margin-top:3px; }
+
+  .search-wrap{ position:relative; margin-bottom:14px; }
+  .search-wrap input{
+    width:100%;
+    padding:13px 16px;
+    border:1.5px solid var(--line);
+    border-radius:10px;
+    font-family:'Inter',sans-serif;
+    font-size:15px;
+    color:var(--ink);
+    background:var(--paper);
+    outline:none;
+    transition:border-color .15s ease;
+  }
+  .search-wrap input:focus{ border-color:var(--maroon); background:#fff; }
+
+  .results{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    max-height:260px;
+    overflow-y:auto;
+    margin-bottom:6px;
+  }
+  .result-item{
+    text-align:left;
+    border:1px solid var(--line);
+    background:#fff;
+    border-radius:9px;
+    padding:12px 14px;
+    cursor:pointer;
+    font-size:14.5px;
+    color:var(--ink);
+    transition:border-color .12s ease, background .12s ease;
+  }
+  .result-item:hover{ border-color:var(--maroon); background:var(--paper); }
+  .result-item .r-title{ font-size:12px; color:var(--muted); margin-top:2px; }
+  .empty-note{
+    font-size:14px;
+    color:var(--muted);
+    padding:10px 2px 4px;
+    line-height:1.5;
+  }
+
+  .back-link{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-size:13.5px;
+    color:var(--muted);
+    background:none;
+    border:none;
+    cursor:pointer;
+    padding:0;
+    margin-bottom:18px;
+  }
+  .back-link:hover{ color:var(--maroon); }
+
+  .missing-link{
+    display:block;
+    text-align:center;
+    margin-top:18px;
+    font-size:13.5px;
+    color:var(--muted);
+    background:none;
+    border:none;
+    cursor:pointer;
+    width:100%;
+    text-decoration:underline;
+    text-underline-offset:3px;
+  }
+  .missing-link:hover{ color:var(--maroon); }
+
+  .confirm-name{
+    font-family:'Lora',serif;
+    font-size:24px;
+    font-weight:600;
+    color:var(--maroon);
+    margin:2px 0 4px;
+  }
+  .confirm-role{
+    font-size:13.5px;
+    color:var(--muted);
+    margin-bottom:4px;
+  }
+  .confirm-title{
+    font-size:13.5px;
+    color:var(--ink);
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:9px;
+    padding:10px 12px;
+    margin:14px 0 4px;
+    line-height:1.5;
+  }
+  .download-btn{
+    width:100%;
+    margin-top:20px;
+    padding:15px 18px;
+    background:var(--maroon);
+    color:#fff;
+    border:none;
+    border-radius:10px;
+    font-family:'Inter',sans-serif;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:9px;
+    transition:background .15s ease;
+    text-decoration:none;
+  }
+  .download-btn:hover{ background:var(--maroon-dark); }
+  .not-you{
+    display:block;
+    text-align:center;
+    margin-top:14px;
+    font-size:13px;
+    color:var(--muted);
+    background:none;
+    border:none;
+    cursor:pointer;
+    text-decoration:underline;
+    text-underline-offset:3px;
+    width:100%;
+  }
+  .not-you:hover{ color:var(--maroon); }
+
+  textarea{
+    width:100%;
+    min-height:110px;
+    padding:13px 14px;
+    border:1.5px solid var(--line);
+    border-radius:10px;
+    font-family:'Inter',sans-serif;
+    font-size:14.5px;
+    color:var(--ink);
+    background:var(--paper);
+    outline:none;
+    resize:vertical;
+    margin-bottom:14px;
+  }
+  textarea:focus{ border-color:var(--maroon); background:#fff; }
+  input.name-field{
+    width:100%;
+    padding:12px 14px;
+    border:1.5px solid var(--line);
+    border-radius:10px;
+    font-family:'Inter',sans-serif;
+    font-size:14.5px;
+    background:var(--paper);
+    margin-bottom:14px;
+    outline:none;
+  }
+  input.name-field:focus{ border-color:var(--maroon); background:#fff; }
+  label.field-label{
+    display:block;
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--ink);
+    margin-bottom:6px;
+  }
+  .send-btn{
+    width:100%;
+    padding:14px 18px;
+    background:var(--ink);
+    color:#fff;
+    border:none;
+    border-radius:10px;
+    font-family:'Inter',sans-serif;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .send-btn:hover{ background:#000; }
+
+  .success-box{
+    text-align:center;
+    padding:10px 0 4px;
+  }
+  .success-box .tick{
+    width:52px;height:52px;border-radius:50%;
+    background:var(--paper);
+    border:1.5px solid var(--line);
+    display:flex;align-items:center;justify-content:center;
+    margin:0 auto 16px;
+    font-size:24px;
+    color:var(--maroon);
+  }
+  .success-box h3{
+    font-family:'Lora',serif;
+    font-size:19px;
+    margin:0 0 8px;
+  }
+  .success-box p{
+    color:var(--muted);
+    font-size:14px;
+    line-height:1.55;
+    margin:0 0 6px;
+  }
+
+  footer{
+    max-width:520px;
+    text-align:center;
+    margin-top:28px;
+    font-size:12.5px;
+    color:var(--muted);
+    line-height:1.6;
+  }
+
+  .fade{ animation:fadeIn .28s ease; }
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);} }
+
+  @media (prefers-reduced-motion: reduce){ .fade{ animation:none; } }
+
+  ::-webkit-scrollbar{ width:8px; }
+  ::-webkit-scrollbar-thumb{ background:var(--line); border-radius:8px; }
+</style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="mark"></div>
+    <div class="wordmark">STACK 2026 <span>· Certificates</span></div>
+  </div>
+
+  <header class="hero">
+    <h1>Find your certificate</h1>
+    <p>Look up your name to download your certificate from the 2026 International Meeting of the STACK Community, held in Nairobi, Kenya.</p>
+  </header>
+
+  <div class="card" id="card"></div>
+
+  <footer>
+    Held 27–31 August 2026 in Nairobi, Kenya · University of Nairobi<br>
+    Trouble with your certificate? Use the "Can't find your name" option below the search box.
+  </footer>
+
+<script>
+// ---------------------------------------------------------------------
+// DATA — every registered name, which list they belong to, their
+// certificate filename, and (for presenters) their talk title.
+// ---------------------------------------------------------------------
+const CERTS = [{"name": "Masumi Kameda", "category": "presenter", "file": "Masumi_Kameda.pdf", "title": "From Mathematical Resources to Randomized STACK Quizzes via Generative AI"}, {"name": "Santiago Borio", "category": "presenter", "file": "Santiago_Borio.pdf", "title": "Using a Trained STACK AI Assistant for Authoring and Reviewing STACK Questions"}, {"name": "Ben Davies", "category": "presenter", "file": "Ben_Davies.pdf", "title": "Whose job is it now? Agentic AI, STACK, and the changing dynamics of question authoring"}, {"name": "Andrey Chesnokov", "category": "presenter", "file": "Andrey_Chesnokov.pdf", "title": "STACK, CodeRunner, AI: how to integrate different digital tools into Engineering Mathematics classes. Experiences from NTNU, Norway."}, {"name": "Motognon Wastalas d'Assise Dogbalou", "category": "presenter", "file": "Motognon_Wastalas_d_Assise_Dogbalou.pdf", "title": "Turning Student Errors into Learning Opportunities: AI-Enhanced STACK Assessment in Higher Education"}, {"name": "Cynthia Mwau", "category": "presenter", "file": "Cynthia_Mwau.pdf", "title": "AI-Enhanced Offline-First STACK Deployment for Equitable Mathematics Assessment in Low-Resource Secondary Schools"}, {"name": "Beth Kiratu", "category": "presenter", "file": "Beth_Kiratu.pdf", "title": "STACK in Action: A Digital Assessment Success Story from the Open University of Kenya"}, {"name": "Tim Lowe", "category": "presenter", "file": "Tim_Lowe.pdf", "title": "A decade of STACK at the UK Open University"}, {"name": "Duncan Otieno", "category": "presenter", "file": "Duncan_Otieno.pdf", "title": "Supporting Large Mathematics Classes with STACK at MMUST; Teaching Practices and Student Performance."}, {"name": "Ben Obiero", "category": "presenter", "file": "Ben_Obiero.pdf", "title": "Automated Assessment After AI: Rethinking What STACK Should Measure"}, {"name": "George Lawi", "category": "presenter", "file": "George_Lawi.pdf", "title": "From Adoption to Institutionalisation: The STACK at MMUST"}, {"name": "Wyclife Ogik Rao", "category": "presenter", "file": "Wyclife_Ogik_Rao.pdf", "title": "Technology-Enhanced Formative Assessment in Mathematics: Evaluating the Impact of STACK on Student Learning"}, {"name": "Dr. Jade Abuga", "category": "presenter", "file": "Dr_Jade_Abuga.pdf", "title": "Enhancing Calculus Instruction in Maseno Using STACK"}, {"name": "Martin Mugochi", "category": "presenter", "file": "Martin_Mugochi.pdf", "title": "Implementing STACK at UNAM"}, {"name": "Atem Bul", "category": "presenter", "file": "Atem_Bul.pdf", "title": "Challenges in the adoption and implementation of STACK in Teaching and Assessment of students’ performance"}, {"name": "Calvince Ouma", "category": "presenter", "file": "Calvince_Ouma.pdf", "title": "Enhancing Formative Assessment in Undergraduate Calculus Using STACK at a Kenyan University"}, {"name": "Idrissa Said Amour", "category": "presenter", "file": "Idrissa_Said_Amour.pdf", "title": "Enhancing Blended Mathematics Instruction Using STACK at the University of Dar es Salaam"}, {"name": "Daniel Duviol Tcheutia", "category": "presenter", "file": "Daniel_Duviol_Tcheutia.pdf", "title": "Scaling STEM Education in Africa: A Digital Transformation Framework Integrating STACK for Inclusive and High-Quality Learning"}, {"name": "Nathalie Wandji", "category": "presenter", "file": "Nathalie_Wandji.pdf", "title": "Scaling STEM Education in Africa: A Digital Transformation Framework Integrating STACK for Inclusive and High-Quality Learning"}, {"name": "Getnet Worku Bantayehu", "category": "presenter", "file": "Getnet_Worku_Bantayehu.pdf", "title": "Scaling Up STACK Capacity: A Multi-University Training Initiative in Ethiopia"}, {"name": "Odero Everlyne Akoth", "category": "presenter", "file": "Odero_Everlyne_Akoth.pdf", "title": "Evaluating the Impact of STACK E-Assessment Institutionalisation on Student Performance and Lecturer Workload at MMUST"}, {"name": "Zevick Juma", "category": "presenter", "file": "Zevick_Juma.pdf", "title": "Evaluating the Impact of STACK E-Assessment Institutionalisation on Student Performance and Lecturer Workload at MMUST"}, {"name": "Mojca Premuš", "category": "presenter", "file": "Mojca_Premus.pdf", "title": "Analysing Student Errors to Evolve STACK Questions and Formative Feedback"}, {"name": "Egil Krystad", "category": "presenter", "file": "Egil_Krystad.pdf", "title": "Assessment of STACK as formative learning activity and collaborative test tool in a preparatory course for engineering"}, {"name": "Mary Okombo", "category": "presenter", "file": "Mary_Okombo.pdf", "title": "Course-Level Changes in Student Performance After STACK Integration."}, {"name": "Zelalem Wale", "category": "presenter", "file": "Zelalem_Wale.pdf", "title": "An Evaluation of STACK Implementation at Saint Paul Millennium College, Addis Ababa from the Students' Perspective"}, {"name": "Marie Chantal Diawara", "category": "presenter", "file": "Marie_Chantal_Diawara.pdf", "title": "An instant learning system promoting autonomy in West Africa"}, {"name": "Ermias Alemayehu Asefa", "category": "presenter", "file": "Ermias_Alemayehu_Asefa.pdf", "title": "Investigating Low Student Engagement in Large-Scale STACK Implementation: Reflections from Math 1011 at Bahir Dar University"}, {"name": "Daniel Duviol Tcheutia", "category": "presenter", "file": "Daniel_Duviol_Tcheutia_2.pdf", "title": "Enhancing Large-Scale Mathematics Learning with STACK: A Linear Algebra Refresher Course in a Resource-Constrained Context"}, {"name": "Nathalie Diane Wandji Nanda", "category": "presenter", "file": "Nathalie_Diane_Wandji_Nanda.pdf", "title": "Enhancing Large-Scale Mathematics Learning with STACK: A Linear Algebra Refresher Course in a Resource-Constrained Context"}, {"name": "Seth Asante", "category": "presenter", "file": "Seth_Asante.pdf", "title": "Implementing Assessment of Abstract Mathematics in Ghana Using STACK: Challenges, Progress, and Early Outcomes"}, {"name": "Hans Jakob Rivertz", "category": "presenter", "file": "Hans_Jakob_Rivertz.pdf", "title": "Using JSON for JSXGraph integration in STACK, a case study"}, {"name": "Alfred Wassermann", "category": "presenter", "file": "Alfred_Wassermann.pdf", "title": "Calculus with JSXGraph and STACK"}, {"name": "Georg Osang", "category": "presenter", "file": "Georg_Osang.pdf", "title": "Integrating STACK intro the PreTeXt textbook authoring system"}, {"name": "Benjamin Lloyd-Hurwitz", "category": "presenter", "file": "Benjamin_Lloyd_Hurwitz.pdf", "title": "Organising Teams to Fully Utilise STACK in Fast-Changing Environments"}, {"name": "Christopher Onyango", "category": "presenter", "file": "Christopher_Onyango.pdf", "title": "Exploring digital assessment systems Integration to Support High School Mathematics Learning and Reduce Math Anxiety at North Edgecombe, NC,USA."}, {"name": "Kikete Wabuya", "category": "presenter", "file": "Kikete_Wabuya.pdf", "title": "Reimagining Mathematics Teacher Development in the CBC Era: The Design of a Work-Integrated Master of Science in Mathematical Innovation at the Open University of Kenya"}, {"name": "George Ionita", "category": "presenter", "file": "George_Ionita.pdf", "title": "Implementing Large-Scale BYOD Exams with Safe Exam Browser: Lessons from Five Years at ETH Zurich"}, {"name": "Meike Akveld", "category": "presenter", "file": "Meike_Akveld.pdf", "title": "Implementing Large-Scale BYOD Exams with Safe Exam Browser: Lessons from Five Years at ETH Zurich"}, {"name": "Vesna Perisic", "category": "presenter", "file": "Vesna_Perisic.pdf", "title": "Embedding STACK in learning, teaching and research"}, {"name": "Mary Ochieng", "category": "presenter", "file": "Mary_Ochieng.pdf", "title": "Statistics Education and Online Assessment: Opportunities in an Emerging Research Area"}, {"name": "Johannes Knaut", "category": "presenter", "file": "Johannes_Knaut.pdf", "title": "Creating Likert-Scale Questionnaires with STACK in Moodle: A Practical Workflow for Instructors"}, {"name": "Stephanie Schmitt-Rüth", "category": "presenter", "file": "Stephanie_Schmitt_Ruth.pdf", "title": "Creating Likert-Scale Questionnaires with STACK in Moodle: A Practical Workflow for Instructors"}, {"name": "Nada Sissouno", "category": "presenter", "file": "Nada_Sissouno.pdf", "title": "Creating Likert-Scale Questionnaires with STACK in Moodle: A Practical Workflow for Instructors"}, {"name": "Ian Jones", "category": "presenter", "file": "Ian_Jones.pdf", "title": "Very Very Open-Ended Questions in Online Assessments"}, {"name": "Aklilu Zeleke", "category": "presenter", "file": "Aklilu_Zeleke.pdf", "title": "Bridging Assessment and Discovery: Can STACK Support Undergraduate Mathematics Research?"}, {"name": "Mary Ochieng", "category": "presenter", "file": "Mary_Ochieng_2.pdf", "title": "A Cross-Context Comparison of WeBWorK and STACK in Two Precalculus Courses"}, {"name": "Abdulkadir Ibrahim", "category": "presenter", "file": "Abdulkadir_Ibrahim.pdf", "title": "Improving Teaching and Assessment in Mathematics Courses Using STACK-Based Automated Formative Assessment: Student Perspectives"}, {"name": "Meike Akveld", "category": "presenter", "file": "Meike_Akveld_2.pdf", "title": "Teaching Optimization with Interactive 2D/3D Visualizations in JSXGraph"}, {"name": "Florian Lindemann", "category": "presenter", "file": "Florian_Lindemann.pdf", "title": "Teaching Optimization with Interactive 2D/3D Visualizations in JSXGraph"}, {"name": "Abdu Mohammed Seid", "category": "presenter", "file": "Abdu_Mohammed_Seid.pdf", "title": "From Conference Collaboration to Classroom Impact: Developing and Scaling an Interactive STACK Digital Textbook for Basic Mathematics"}, {"name": "Juma Zevick", "category": "presenter", "file": "Juma_Zevick.pdf", "title": "Evaluating STACK Integration Across Institutions: Evidence from Maseno, MMUST, and UniTS"}, {"name": "Lily Clements", "category": "presenter", "file": "Lily_Clements.pdf", "title": "Variant-Rich Statistics Textbooks with STACK"}, {"name": "Tadesse Teressa", "category": "presenter", "file": "Tadesse_Teressa.pdf", "title": "The Challenges and Prospects of Implementing STEAM Education in Ethiopian General Education Schools"}, {"name": "Aboubacari Amadou", "category": "presenter", "file": "Aboubacari_Amadou.pdf", "title": "Integration of STACK in Statistics Education in West Africa: A Case Study from Data Analysis Training in Niger."}, {"name": "James Musyoka", "category": "presenter", "file": "James_Musyoka.pdf", "title": "An Open Textbook for Descriptive Statistics with Embedded STACK Mastery Exercises"}, {"name": "Jinghao Cao", "category": "presenter", "file": "Jinghao_Cao.pdf", "title": "Introducing STACK into Caltech’s “Introductory Methods of Applied Mathematics for the Physical Sciences” Course"}, {"name": "Franca Hoffmann", "category": "presenter", "file": "Franca_Hoffmann.pdf", "title": "Introducing STACK into Caltech’s “Introductory Methods of Applied Mathematics for the Physical Sciences” Course"}, {"name": "Ritvik Teegavarapu", "category": "presenter", "file": "Ritvik_Teegavarapu.pdf", "title": "Introducing STACK into Caltech’s “Introductory Methods of Applied Mathematics for the Physical Sciences” Course"}, {"name": "Fatima Yusuf Hussein", "category": "presenter", "file": "Fatima_Yusuf_Hussein.pdf", "title": "Enhancing Student Performance through Formative Assignments Using STACK in Calculus I: A Proposed Study at Somali National University"}, {"name": "stephen Mboya", "category": "presenter", "file": "stephen_Mboya.pdf", "title": "Developing and reviewing STACK questions for Mathematics."}, {"name": "Michael Oke", "category": "presenter", "file": "Michael_Oke.pdf", "title": "Strengthening STEM Pedagogy through Cross-Institutional Collaboration in Nigeria"}, {"name": "John Argentino", "category": "attendee", "file": "John_Argentino.pdf", "title": null}, {"name": "David Stern", "category": "attendee", "file": "David_Stern.pdf", "title": null}, {"name": "Mawora Thomas Mwakudisa", "category": "attendee", "file": "Mawora_Thomas_Mwakudisa.pdf", "title": null}, {"name": "Michael Onyimbo", "category": "attendee", "file": "Michael_Onyimbo.pdf", "title": null}, {"name": "Sheila Cherotich", "category": "attendee", "file": "Sheila_Cherotich.pdf", "title": null}, {"name": "Lucian Talu Mayabi", "category": "attendee", "file": "Lucian_Talu_Mayabi.pdf", "title": null}, {"name": "kelvin Barasa", "category": "attendee", "file": "kelvin_Barasa.pdf", "title": null}, {"name": "Zelalem Teshome", "category": "attendee", "file": "Zelalem_Teshome.pdf", "title": null}, {"name": "Marion Wagner", "category": "attendee", "file": "Marion_Wagner.pdf", "title": null}, {"name": "Meiline Wolf", "category": "attendee", "file": "Meiline_Wolf.pdf", "title": null}, {"name": "Yasuyuki Nakamura", "category": "attendee", "file": "Yasuyuki_Nakamura.pdf", "title": null}, {"name": "Chris Sangwin", "category": "attendee", "file": "Chris_Sangwin.pdf", "title": null}, {"name": "Berhanu", "category": "attendee", "file": "Berhanu.pdf", "title": null}, {"name": "Ateamate Mukabana", "category": "attendee", "file": "Ateamate_Mukabana.pdf", "title": null}, {"name": "Robert Otieno", "category": "attendee", "file": "Robert_Otieno.pdf", "title": null}, {"name": "Mike Altieri", "category": "attendee", "file": "Mike_Altieri.pdf", "title": null}, {"name": "Jason Kamau", "category": "attendee", "file": "Jason_Kamau.pdf", "title": null}, {"name": "Ibrahim Adam", "category": "attendee", "file": "Ibrahim_Adam.pdf", "title": null}, {"name": "Giovanni Cabrera", "category": "attendee", "file": "Giovanni_Cabrera.pdf", "title": null}, {"name": "Max Marite", "category": "attendee", "file": "Max_Marite.pdf", "title": null}, {"name": "Jared Ongaro", "category": "attendee", "file": "Jared_Ongaro.pdf", "title": null}, {"name": "Joseph Baya", "category": "attendee", "file": "Joseph_Baya.pdf", "title": null}, {"name": "Siro Leonard", "category": "attendee", "file": "Siro_Leonard.pdf", "title": null}, {"name": "Calvine Odiwuor", "category": "attendee", "file": "Calvine_Odiwuor.pdf", "title": null}, {"name": "Collins Otieno", "category": "attendee", "file": "Collins_Otieno.pdf", "title": null}, {"name": "Isaiah Olwanda", "category": "attendee", "file": "Isaiah_Olwanda.pdf", "title": null}, {"name": "Lourdess Igene", "category": "attendee", "file": "Lourdess_Igene.pdf", "title": null}, {"name": "Adam Clearwater", "category": "attendee", "file": "Adam_Clearwater.pdf", "title": null}, {"name": "Esther Diera", "category": "attendee", "file": "Esther_Diera.pdf", "title": null}, {"name": "Fredrick Koech", "category": "attendee", "file": "Fredrick_Koech.pdf", "title": null}, {"name": "Rodgers Maragia", "category": "attendee", "file": "Rodgers_Maragia.pdf", "title": null}, {"name": "Daniel Murunga", "category": "attendee", "file": "Daniel_Murunga.pdf", "title": null}, {"name": "Michael Obiero", "category": "attendee", "file": "Michael_Obiero.pdf", "title": null}, {"name": "Monica Sherily", "category": "attendee", "file": "Monica_Sherily.pdf", "title": null}, {"name": "Godfrey Ouma", "category": "attendee", "file": "Godfrey_Ouma.pdf", "title": null}, {"name": "Armstrong Opondo Omuhinda", "category": "attendee", "file": "Armstrong_Opondo_Omuhinda.pdf", "title": null}, {"name": "Betty Karira", "category": "attendee", "file": "Betty_Karira.pdf", "title": null}, {"name": "Irene Sitawa", "category": "attendee", "file": "Irene_Sitawa.pdf", "title": null}, {"name": "Aboubacari", "category": "attendee", "file": "Aboubacari.pdf", "title": null}, {"name": "Benard odongo", "category": "attendee", "file": "Benard_odongo.pdf", "title": null}, {"name": "Jacob Manyuon Dhieu Chol", "category": "attendee", "file": "Jacob_Manyuon_Dhieu_Chol.pdf", "title": null}, {"name": "Francis Torgbor", "category": "attendee", "file": "Francis_Torgbor.pdf", "title": null}, {"name": "Emmanuel Afrifa", "category": "attendee", "file": "Emmanuel_Afrifa.pdf", "title": null}, {"name": "Ernest Ting", "category": "attendee", "file": "Ernest_Ting.pdf", "title": null}, {"name": "Théodore HABIMANA", "category": "attendee", "file": "Theodore_HABIMANA.pdf", "title": null}, {"name": "Owen Mulinya Kizito", "category": "attendee", "file": "Owen_Mulinya_Kizito.pdf", "title": null}, {"name": "Ronald Oluoch", "category": "attendee", "file": "Ronald_Oluoch.pdf", "title": null}, {"name": "Matthew Gherman", "category": "attendee", "file": "Matthew_Gherman.pdf", "title": null}, {"name": "Joshua Agbarakwe", "category": "attendee", "file": "Joshua_Agbarakwe.pdf", "title": null}, {"name": "Samuel Apima", "category": "attendee", "file": "Samuel_Apima.pdf", "title": null}, {"name": "Jane Ndinda Ndambuki", "category": "attendee", "file": "Jane_Ndinda_Ndambuki.pdf", "title": null}, {"name": "Dr Ronoh Hillan", "category": "attendee", "file": "Dr_Ronoh_Hillan.pdf", "title": null}, {"name": "Rahab Chiira", "category": "attendee", "file": "Rahab_Chiira.pdf", "title": null}];
+
+// ---------------------------------------------------------------------
+// Google Drive file IDs, keyed by certificate filename.
+// Fill these in using the Apps Script provided alongside this file —
+// it will print a ready-to-paste object in exactly this shape.
+// ---------------------------------------------------------------------
+
+const DRIVE_IDS = {
+  "Abdu_Mohammed_Seid.pdf": "1P2twYZzvfzEBqhnu8H9ku-Jvqs6tW_gO",
+  "Abdulkadir_Ibrahim.pdf": "1CJ4Mk_Cz4u2fNG0Iyoyyhf1WIjUe7-OB",
+  "Aboubacari.pdf": "13bgfPA28TcOxYmPo0paGrceSrq1HhPzT",
+  "Aboubacari_Amadou.pdf": "1YKkfvkkWfAhCbHOCLAXrNScsUJfJgY6H",
+  "Adam_Clearwater.pdf": "1zmUCrAk25PltXZuXzJezRJlV6nVwHcqf",
+  "Aklilu_Zeleke.pdf": "1EMWlLph-oblno8X4BDLmy-rvdiu692XS",
+  "Alfred_Wassermann.pdf": "1bNG6_YUDBgyjYAvfzQkCJEwVtKbx4VLA",
+  "Andrey_Chesnokov.pdf": "1ucJ6PHIf0bcBPsD2sL8i8-136bUvFCno",
+  "Armstrong_Opondo_Omuhinda.pdf": "1IA2qGuem78KHvwAUsbxRzMzgvRgpDRCU",
+  "Ateamate_Mukabana.pdf": "1b7-1nuGKLWHhRMf7LiPpLwzA2smdICFf",
+  "Atem_Bul.pdf": "1CCWxMqTkE6pMOFtGa2aNQLOQebC5taYA",
+  "Ben_Davies.pdf": "14_ipYd7nxsfsAZ6cGyPhDGOOScoXQ93g",
+  "Ben_Obiero.pdf": "1Yc7xbmhRlVmAXQ8X5oqeQ_m4a5HMrtNC",
+  "Benard_odongo.pdf": "1Re1QScVgL79E33b5YpW63I9nuVGj9T9t",
+  "Benjamin_Lloyd_Hurwitz.pdf": "12SgmKSXlpIJXjz0Q0j5CvE0oge13pVYl",
+  "Berhanu.pdf": "1ahg8ZHUHI7n0r1iXtHu_RFIkJ7fk0zUn",
+  "Beth_Kiratu.pdf": "1KHmZEe4DeMi5g_Vnv9qQ9PavvwYdx3Nt",
+  "Betty_Karira.pdf": "1u8lr7H4QhYixkPjdyWU2aEmD_G0w60na",
+  "Calvince_Ouma.pdf": "15DmjLsZDKy37Fub-b-MHrPVyjcxI2M6U",
+  "Calvine_Odiwuor.pdf": "1wzrAs2UlVmOSfx8AmSwmMLtwXvW25Iqd",
+  "Chris_Sangwin.pdf": "1tDdOB-CdiZ3Bfp3lXHR0X2tlvUDAbqzH",
+  "Christopher_Onyango.pdf": "1-q29FWGyezbgS6iZ2n8fUG6p3Y9KhV6q",
+  "Collins_Otieno.pdf": "1vHca8v8FX0v1hcjzObwr8vDr9bDSQkmZ",
+  "Cynthia_Mwau.pdf": "1u3g-wMRGTuOFrYUwLlBcLZAejmN3VUCN",
+  "Daniel_Duviol_Tcheutia.pdf": "1ED9fSoAunGnLFbNNHQZYZ6ZJZKgnQYhP",
+  "Daniel_Duviol_Tcheutia_2.pdf": "1d4cBqXcFyvgI9ai8ZYb9gbKj2sVDrRXo",
+  "Daniel_Murunga.pdf": "1MJ7q8Z2w5Eu4MvtQ8w0oIrfuQQjoILMw",
+  "David_Stern.pdf": "12X9AoQfHaLdi7ur5YtilC9zCkD_h-5L5",
+  "Dr_Jade_Abuga.pdf": "1qMX6M_AaxrIkykgx44qhtVcm0SUOe26z",
+  "Dr_Ronoh_Hillan.pdf": "1-ry-NwJgsoh_Oa0KXhH6F40euhmsrSYU",
+  "Duncan_Otieno.pdf": "1ETBnlmlFLmqjOPJkUylpH8Z1dX675HQF",
+  "Egil_Krystad.pdf": "1ksA6t1LjKww8gs1b9XxQ0_bahCwtSaaM",
+  "Emmanuel_Afrifa.pdf": "13HABRFjpZCSH410kPvlTKpgDYCi9V2zi",
+  "Ermias_Alemayehu_Asefa.pdf": "1lfg60IFcDd3WO7r5271vK8c4ina-OqvD",
+  "Ernest_Ting.pdf": "1subeNQfNKh_KCPO3AsBIiK5RFCUrT3Dp",
+  "Esther_Diera.pdf": "1mrAn7IvtpND5i-Douawe7ZOZoi-zJ0mM",
+  "Fatima_Yusuf_Hussein.pdf": "1ydzg7t8WC-C3hj2LhpWMx6BG9Ve1RQ5j",
+  "Florian_Lindemann.pdf": "1xqM0G8kZyOKOwY7quVJe0bvmVYj8dcSf",
+  "Franca_Hoffmann.pdf": "1uxrqr5nq8552V3Py_oTIVKfBR1i0oy-q",
+  "Francis_Torgbor.pdf": "1ahrmaSwo9hHilrSK8zHUHB9jJl6sQ56L",
+  "Fredrick_Koech.pdf": "1_sgctsGW1eKsYu3-ZX4CofPOQlu54TrY",
+  "Georg_Osang.pdf": "1R4qakAqEXbtNLfC8wGzxrS1k5b4a7wVl",
+  "George_Ionita.pdf": "1EYiJ-lnyjnry1bEuFF3IT_jDJDbZGbmB",
+  "George_Lawi.pdf": "1pVyJL_7mzADj0UolKjZc26bLeqliZV15",
+  "Getnet_Worku_Bantayehu.pdf": "1LSDqDLvj5_yCNO4jIdMPihjzD2PhD77T",
+  "Giovanni_Cabrera.pdf": "1nR1VcUeVQx5REvwUMuF6YBWYB4Q_hB7F",
+  "Godfrey_Ouma.pdf": "1P76OqttZ0Ss_ilt32d2zNhKnu2pWV9ry",
+  "Hans_Jakob_Rivertz.pdf": "1WtIEeI8p7pJIRF7gHsgH87zrYiR86qnv",
+  "Ian_Jones.pdf": "11Anz_Eb26Vl8l0uxd-BwNp-UzKhcgagk",
+  "Ibrahim_Adam.pdf": "1mV9_E163IuZpC5t-kdLLh713VsdplGE9",
+  "Idrissa_Said_Amour.pdf": "1lVRswakZwPMKN8GiIKj9XXrG3NtF6Zvd",
+  "Irene_Sitawa.pdf": "17WI792VT0JD7b0i4PIptl9VhTlOEO7Ol",
+  "Isaiah_Olwanda.pdf": "1vQGN5Q6g9JlaTjZCmbbbb9pd8Z_RlnIz",
+  "Jacob_Manyuon_Dhieu_Chol.pdf": "15GhnwjRY1VTzZofUfxZupM4YWi96KQ8-",
+  "James_Musyoka.pdf": "1IfA1f3RqeUeNwV5AFFIrQg5ywUsjDqRt",
+  "Jane_Ndinda_Ndambuki.pdf": "1IE3VDki77BmHNksN0-wzwTnkOhp37rbH",
+  "Jared_Ongaro.pdf": "123aYX3HjK1yq1oB8tIImppbZs0sST6nQ",
+  "Jason_Kamau.pdf": "1Yy0-JrRbu7_mJ1qp9Of1SO9stC5K4jZ5",
+  "Jinghao_Cao.pdf": "1jl9RcwTheBCag5WM_lEZlOI9RcOymaQS",
+  "Johannes_Knaut.pdf": "1hipYI8m47x5HTis4dy-NC3wor20SniKB",
+  "John_Argentino.pdf": "1Pf1SHI3Lh2w8OF04m8oA98AJMSx7dwQI",
+  "Joseph_Baya.pdf": "1yfvxB_xKsYA0JcEdODpljOhvnGosWtE9",
+  "Joshua_Agbarakwe.pdf": "1y16FAL-unYr5_CUNnnqis87LgtpyzEkn",
+  "Juma_Zevick.pdf": "1guMld997VN6EFPjJ6W2xJtxmn7zqdBm2",
+  "Kikete_Wabuya.pdf": "13nRhJHB0sOXoYYvQ603y81KmCgA2KoLN",
+  "Lily_Clements.pdf": "1ignT6Ief3Vc2NcsMj9oIpYdYBqBcEaeT",
+  "Lourdess_Igene.pdf": "1yrglHJIHVybxiSbtnpW55jx7EaAWfrBu",
+  "Lucian_Talu_Mayabi.pdf": "12mryF7EqLlzGNcXdRwwziZDlQBvyZYjk",
+  "Marie_Chantal_Diawara.pdf": "1U7aWsHX5O2XB9TQB-Zf06tpqAv7vHGtb",
+  "Marion_Wagner.pdf": "1yHobjAnD2ToPwx9E_VkZpsZ7ROWrMfo4",
+  "Martin_Mugochi.pdf": "1QwNVCDUvv_BUeWLuBYHcPt1Z3XaKQie2",
+  "Mary_Ochieng.pdf": "1muPW2sQ-Kq786uoE4NNhpsge8qkLpp0L",
+  "Mary_Ochieng_2.pdf": "1n7y1TDPykbIcAhbosuME9-4p-kWegBD9",
+  "Mary_Okombo.pdf": "1qYgnJnkeovkEO91OJ_TTld3-YshWXcMo",
+  "Masumi_Kameda.pdf": "1HnpxDA8_BIKy0pBRHXiRjCnNjdaY6cW4",
+  "Matthew_Gherman.pdf": "1fzeFKLK-6KL1Aeuno-m9lEmzQGbS0g_m",
+  "Mawora_Thomas_Mwakudisa.pdf": "1gT0V_BJRNPRr0Me3bBvyjifNhrVHGmtu",
+  "Max_Marite.pdf": "1cGaYQwzK3ZXOeY5KjYt13_keQo7o2_ei",
+  "Meike_Akveld.pdf": "1MrfspOXFplUst_GEPW9Q8Zu0WM60y2kM",
+  "Meike_Akveld_2.pdf": "1lvRGSisFGtXkUx1d9qfUBKNYxLGluOeb",
+  "Meiline_Wolf.pdf": "1t8CnQv12kbRiownCiG3kVDLKRQ0pqUl1",
+  "Michael_Obiero.pdf": "1aluJio8LJONE60JfZXeuWdXDNFx5ZLms",
+  "Michael_Oke.pdf": "1mTbPVOroDPeulOHlZB3NGOKqtPINJMFc",
+  "Michael_Onyimbo.pdf": "1EmFxv5YA85KR2-Ab9JIHh2H0e3lZynMg",
+  "Mike_Altieri.pdf": "1B8Lc8-CfdB_6B-L6nxahnmWrcdlDDKRu",
+  "Mojca_Premus.pdf": "1HMiGW6318yU0aABQRmmYB0htso3vYOCw",
+  "Monica_Sherily.pdf": "1V_tHmsT57J9tGQhGKTitqHp_g0Nd3WuW",
+  "Motognon_Wastalas_d_Assise_Dogbalou.pdf": "1yF7z_qY_aSF-kg6Fe3HxRVO2JO3t5x4X",
+  "Nada_Sissouno.pdf": "1l1f7iLdp5YedEcAZOQfqGPktlHWtdP9-",
+  "Nathalie_Diane_Wandji_Nanda.pdf": "1uLrGgZhfkwv-DCjqOECBiT9Mql52hSxo",
+  "Nathalie_Wandji.pdf": "1g4ZsYb4M-X0aQ__cY9uuUP_Z95E-wGw9",
+  "Odero_Everlyne_Akoth.pdf": "1xgdKD0PeYj15a13rzh53HyGyUFKEnDK2",
+  "Owen_Mulinya_Kizito.pdf": "1f4zqTmULIN7kAnKvUWR1aOxZEoHez3N1",
+  "Rahab_Chiira.pdf": "15I2mJBA8hoj0ZOu7MexqabWi1Un6LOYs",
+  "Ritvik_Teegavarapu.pdf": "18cmoJzUiiXBLyFmUmyAxfGrfRNP_PZxA",
+  "Robert_Otieno.pdf": "1SI8NNmBYc1DqgGusy4SIXUIcNk3A21WD",
+  "Rodgers_Maragia.pdf": "1WMhIUsQ3xW_x4xQBOCQ9UlO_ZRPbr-50",
+  "Ronald_Oluoch.pdf": "1bXywzM2HphyOrc3oJ9fv7DULCe3tDA1f",
+  "Samuel_Apima.pdf": "1FEtGsODo9x7HWehHEmncWlk7cfd-R0y0",
+  "Santiago_Borio.pdf": "1t8AzRyZgSvxPxJu-lj4T1qTtvfWciFZb",
+  "Seth_Asante.pdf": "11hpiwvW7FT5ZEMzIkH1eoOqYMtySYXzO",
+  "Sheila_Cherotich.pdf": "1h-WI9gA-pRaNxBjgZBgi411RF3b7RQft",
+  "Siro_Leonard.pdf": "1uEHezfT8tfu-K08z8in70MZol1OmZc10",
+  "Stephanie_Schmitt_Ruth.pdf": "1Off3bPGtQ5E0RbzmPqf1dOyZRk5hlIxU",
+  "Tadesse_Teressa.pdf": "13lDzPWfkKM27fJtBq06mVQm1T-CZnvWM",
+  "Theodore_HABIMANA.pdf": "10tr-9MsJ1zuVxAWCV1CXZiPXhqNdUJ3Z",
+  "Tim_Lowe.pdf": "1Qq-wqiPxJjwoIxUfXuUM-04BkiYb7hSj",
+  "Vesna_Perisic.pdf": "19DHn7br4TceifNJe1kV4pdMfmJS29qC5",
+  "Wyclife_Ogik_Rao.pdf": "141giaZDh7ikbj1hSWYGdFdMYvtxRPLLJ",
+  "Yasuyuki_Nakamura.pdf": "1IQVylZmQGGWHJEhQ9U0zdaM6gvmDxNOI",
+  "Zelalem_Teshome.pdf": "1LTmNscRXqrV-iVLdMRHMo9h8V9e4KNI_",
+  "Zelalem_Wale.pdf": "1WzqvZA5ayyVDHl5mIb8HFTSCZ0hpEXvR",
+  "Zevick_Juma.pdf": "16V2P28Tp6kS0xWkiTggKWBCEv1__bVBa",
+  "kelvin_Barasa.pdf": "1XZPrcPb6uqw7PMlUczZxyfk1hL9e1b82",
+  "stephen_Mboya.pdf": "1tIsq7tNPWRzAQtJi3EP-M5fCShEDAPFr"
+};
+
+// Where "can't find my name" requests are sent (mailto fallback).
+const REQUEST_EMAIL = "murungadaniel2002@gmail.com";
+
+// -----------------------------------------------------------------
+function driveDownloadUrl(file){
+  const id = DRIVE_IDS[file];
+  if(!id) return null;
+  return `https://drive.google.com/uc?export=download&id=${id}`;
+}
+
+function normalize(s){
+  return (s||"")
+    .toLowerCase()
+    .normalize("NFKD").replace(/[\u0300-\u036f]/g,"")
+    .replace(/[^a-z' -]/g," ")
+    .replace(/\s+/g," ")
+    .trim();
+}
+
+function matches(query, name){
+  const q = normalize(query);
+  if(!q) return false;
+  const n = normalize(name);
+  if(n.includes(q)) return true;
+  const qTokens = q.split(" ").filter(Boolean);
+  const nTokens = n.split(" ").filter(Boolean);
+  return qTokens.every(qt => nTokens.some(nt => nt.startsWith(qt)));
+}
+
+const card = document.getElementById("card");
+let state = { category: null };
+
+function render(html){
+  card.innerHTML = `<div class="fade">${html}</div>`;
+}
+
+function stepChoice(){
+  state = { category:null };
+  render(`
+    <p class="step-label">Step 1 of 3</p>
+    <h2 class="step-title">Did you present a talk?</h2>
+    <div class="choice-row">
+      <button class="choice-btn" onclick="stepSearch('presenter')">
+        <span>Yes, I gave a presentation
+          <div class="choice-sub">I spoke at the conference</div>
+        </span>
+        <span class="arrow">→</span>
+      </button>
+      <button class="choice-btn" onclick="stepSearch('attendee')">
+        <span>No, I attended only
+          <div class="choice-sub">I took part without presenting</div>
+        </span>
+        <span class="arrow">→</span>
+      </button>
+    </div>
+  `);
+}
+
+function stepSearch(category){
+  state.category = category;
+  render(`
+    <button class="back-link" onclick="stepChoice()">← Back</button>
+    <p class="step-label">Step 2 of 3</p>
+    <h2 class="step-title">What's your name?</h2>
+    <div class="search-wrap">
+      <input type="text" id="nameInput" placeholder="Start typing your name…" autocomplete="off" oninput="runSearch()">
+    </div>
+    <div class="results" id="results"></div>
+    <button class="missing-link" onclick="stepMissing()">Can't find your name?</button>
+  `);
+  document.getElementById("nameInput").focus();
+}
+
+function runSearch(){
+  const q = document.getElementById("nameInput").value;
+  const resultsEl = document.getElementById("results");
+  if(!q.trim()){
+    resultsEl.innerHTML = "";
+    return;
+  }
+  const pool = CERTS.filter(c => c.category === state.category);
+  const found = pool.filter(c => matches(q, c.name)).slice(0, 8);
+
+  if(found.length === 0){
+    resultsEl.innerHTML = `<div class="empty-note">No match yet — keep typing, or use "Can't find your name?" below if it still doesn't turn up.</div>`;
+    return;
+  }
+  resultsEl.innerHTML = found.map((c,i) => `
+    <button class="result-item" onclick="selectCert(${CERTS.indexOf(c)})">
+      ${c.name}
+      ${c.title ? `<div class="r-title">${c.title}</div>` : ""}
+    </button>
+  `).join("");
+}
+
+function selectCert(idx){
+  const c = CERTS[idx];
+  const url = driveDownloadUrl(c.file);
+  render(`
+    <button class="back-link" onclick="stepSearch(state_category())">← Back to search</button>
+    <p class="step-label">Step 3 of 3</p>
+    <h2 class="step-title">Is this you?</h2>
+    <div class="confirm-name">${c.name}</div>
+    <div class="confirm-role">${c.category === "presenter" ? "Presenter" : "Attendee"} · STACK 2026, Nairobi</div>
+    ${c.title ? `<div class="confirm-title"><strong>Talk:</strong> ${c.title}</div>` : ""}
+    ${
+      url
+      ? `<a class="download-btn" href="${url}" target="_blank" rel="noopener">Download my certificate</a>`
+      : `<div class="empty-note" style="margin-top:16px;">This certificate isn't linked up yet — please use "my name/details are wrong" below and we'll sort it out.</div>`
+    }
+    <button class="not-you" onclick="stepMissing()">Not you, or something looks wrong?</button>
+  `);
+}
+
+function state_category(){ return state.category; }
+
+function stepMissing(){
+  render(`
+    <button class="back-link" onclick="stepSearch(state.category || 'presenter')">← Back</button>
+    <p class="step-label">Report an issue</p>
+    <h2 class="step-title">Let us fix your certificate</h2>
+    <label class="field-label">Your name (as it should appear)</label>
+    <input class="name-field" id="fixName" type="text" placeholder="e.g. Jane Wanjiku Mwangi">
+    <label class="field-label">What's wrong?</label>
+    <textarea id="fixMessage" placeholder="e.g. My name isn't listed, or it's spelled incorrectly on my certificate…"></textarea>
+    <button class="send-btn" onclick="submitMissing()">Send request</button>
+  `);
+}
+
+function submitMissing(){
+  const name = document.getElementById("fixName").value.trim();
+  const message = document.getElementById("fixMessage").value.trim();
+  if(!name || !message){
+    alert("Please fill in both your name and a short description before sending.");
+    return;
+  }
+  const subject = encodeURIComponent(`STACK 2026 certificate issue — ${name}`);
+  const body = encodeURIComponent(
+    `Name: ${name}\nCategory: ${state.category || "not specified"}\n\nIssue:\n${message}`
+  );
+  window.location.href = `mailto:${REQUEST_EMAIL}?subject=${subject}&body=${body}`;
+
+  render(`
+    <div class="success-box">
+      <div class="tick">✓</div>
+      <h3>Request ready to send</h3>
+      <p>Your email app should have opened with the details filled in.<br>
+      If nothing opened, email us directly at <strong>${REQUEST_EMAIL}</strong>.</p>
+      <button class="back-link" style="margin:14px auto 0;justify-content:center;" onclick="stepChoice()">← Start over</button>
+    </div>
+  `);
+}
+
+stepChoice();
+</script>
+</body>
+</html>
